@@ -334,7 +334,8 @@ resource "aws_instance" "bastion" {
 /*
   provisioner "remote-exec" {
     inline = [
-    
+
+      "sudo ssh -i ec2_key.pem ubuntu@${data.aws_instances.asg-instances.instances[0]}"                            #interpolation
       "wget https://codeload.github.com/gist/b55828fa05ed3470d352/zip/3a7183fb56493ca42b5ddeeb73895f5a8cb1d6d3",
       "sudo apt install unzip",
       "unzip 3a7183fb56493ca42b5ddeeb73895f5a8cb1d6d3",
