@@ -15,24 +15,24 @@ resource "aws_vpc" "project_vpc" {
 
 
 #created 4 subnets
-resource "aws_subnet" "pubic-subnet-1" {
+resource "aws_subnet" "public-subnet-1" {
   vpc_id     = aws_vpc.project_vpc.id
   cidr_block = "10.0.0.0/26"
   availability_zone = "ap-south-1a"
 
   tags = {
-    Name = "pubic-subnet-1"
+    Name = "public-subnet-1"
   }
 
 }
 
-resource "aws_subnet" "pubic-subnet-2" {
+resource "aws_subnet" "public-subnet-2" {
   vpc_id     = aws_vpc.project_vpc.id
   cidr_block = "10.0.0.64/26"
   availability_zone = "ap-south-1b"
 
   tags = {
-    Name = "pubic-subnet-2"
+    Name = "public-subnet-2"
   }
 
 }
@@ -89,7 +89,7 @@ resource "aws_eip" "eip-2" {
 #created NAT gateway
 resource "aws_nat_gateway" "NAT-1" {
   allocation_id = aws_eip.eip-1.id
-  subnet_id     = aws_subnet.pubic-subnet-1.id
+  subnet_id     = aws_subnet.public-subnet-1.id
 
   depends_on = [aws_internet_gateway.igw]             # To ensure proper ordering, it is recommended to add an explicit dependency on the Internet Gateway for the VPC.
 
@@ -100,7 +100,7 @@ resource "aws_nat_gateway" "NAT-1" {
 
 resource "aws_nat_gateway" "NAT-2" {
   allocation_id = aws_eip.eip-2.id
-  subnet_id     = aws_subnet.pubic-subnet-2.id
+  subnet_id     = aws_subnet.public-subnet-2.id
 
   depends_on = [aws_internet_gateway.igw]
 
@@ -168,13 +168,13 @@ resource "aws_route_table" "RT-4" {
 
 #Route table association
 resource "aws_route_table_association" "rta-1" {
-  subnet_id      = aws_subnet.pubic-subnet-1.id
+  subnet_id      = aws_subnet.public-subnet-1.id
   route_table_id = aws_route_table.RT-1.id
 }
 
 
 resource "aws_route_table_association" "rta-2" {
-  subnet_id      = aws_subnet.pubic-subnet-2.id
+  subnet_id      = aws_subnet.public-subnet-2.id
   route_table_id = aws_route_table.RT-2.id
 }
 
@@ -310,7 +310,7 @@ resource "aws_security_group" "bastion_sg" {
 resource "aws_instance" "bastion" {
   ami                         = "ami-02d26659fd82cf299"
   instance_type               = "t2.micro"
-  subnet_id                   = aws_subnet.pubic-subnet-1.id        # Public subnet ID
+  subnet_id                   = aws_subnet.public-subnet-1.id        # Public subnet ID
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
   key_name                   = "ec2_key"                            # Name of your EC2 keypair for SSH
   associate_public_ip_address = true
@@ -379,7 +379,7 @@ resource "aws_lb" "application-lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb-sg.id]
-  subnets            = [aws_subnet.pubic-subnet-1.id , aws_subnet.pubic-subnet-2.id]
+  subnets            = [aws_subnet.public-subnet-1.id , aws_subnet.public-subnet-2.id]
 
 }
 
