@@ -6,8 +6,7 @@ provider "aws" {
 #created VPC
 resource "aws_vpc" "project_vpc" {
   cidr_block = "10.0.0.0/24"
-  
-  
+   
   tags = {
     Name = "project_vpc"
   }
@@ -92,8 +91,8 @@ resource "aws_nat_gateway" "NAT-1" {
   allocation_id = aws_eip.eip-1.id
   subnet_id     = aws_subnet.pubic-subnet-1.id
 
-  depends_on = [aws_internet_gateway.igw]                                               # To ensure proper ordering, it is recommended to add an explicit dependency
-                                                                                        # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.igw]             # To ensure proper ordering, it is recommended to add an explicit dependency on the Internet Gateway for the VPC.
+
   tags = {
     Name = "NAT-1"
   }
@@ -261,7 +260,7 @@ resource "aws_autoscaling_group" "ec2-asg" {
   tag {
     key                 = "ec2-asg"
     value               = "ec2-asg-instance"
-    propagate_at_launch = true                   #ensures that the tags are attached to the launched instances automatically.
+    propagate_at_launch = true                                    #ensures that the tags are attached to the launched instances automatically.
   }
 
 }
@@ -276,18 +275,8 @@ data "aws_instances" "asg-instances" {
   instance_state_names = ["running"]
 
   depends_on = [aws_autoscaling_group.ec2-asg]
+
 }
-
-# Output the private IPs as a list
-output "asg-instance-private-ips-1" {
-  value = data.aws_instances.asg-instances.private_ips[0]
-}
-
-output "asg-instance-private-ips-2" {
-  value = data.aws_instances.asg-instances.private_ips[1]
-}
-
-
 
 #creating required resources for bastion host
 resource "aws_security_group" "bastion_sg" {
@@ -421,12 +410,21 @@ resource "aws_autoscaling_attachment" "tg-attachment" {                 #yaha pe
   lb_target_group_arn    = aws_lb_target_group.alb-target-group.arn
 }
 
-output "load_balancer_dns" {
-  value = aws_lb.application-lb.dns_name
-  
+# Output the private IPs as a list
+output "asg-instance-private-ips-1" {
+  value = data.aws_instances.asg-instances.private_ips[0]
+}
+
+output "asg-instance-private-ips-2" {
+  value = data.aws_instances.asg-instances.private_ips[1]
 }
 
 output "bastion-public-ip" {
   value = aws_instance.bastion.public_ip
+}
+
+output "load_balancer_dns" {
+  value = aws_lb.application-lb.dns_name
+  
 }
 
