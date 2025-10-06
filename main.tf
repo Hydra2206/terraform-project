@@ -314,6 +314,7 @@ resource "aws_instance" "bastion" {
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
   key_name                   = "ec2_key"                            # Name of your EC2 keypair for SSH
   associate_public_ip_address = true
+  user_data_base64 = filebase64("userdata.sh")
 
   tags = {
     Name = "Bastion-Host"
