@@ -1,11 +1,6 @@
-provider "aws" {
-    region = "ap-south-1"
-
-}
-
 #created VPC
 resource "aws_vpc" "project_vpc" {
-  cidr_block = "10.0.0.0/24"
+  cidr_block = var.cidr_block
    
   tags = {
     Name = "project_vpc"
@@ -17,8 +12,8 @@ resource "aws_vpc" "project_vpc" {
 #created 4 subnets
 resource "aws_subnet" "public-subnet-1" {
   vpc_id     = aws_vpc.project_vpc.id
-  cidr_block = "10.0.0.0/26"
-  availability_zone = "ap-south-1a"
+  cidr_block = var.subnet-1-cidr
+  availability_zone = var.subnet-1-az
 
   tags = {
     Name = "public-subnet-1"
@@ -28,8 +23,8 @@ resource "aws_subnet" "public-subnet-1" {
 
 resource "aws_subnet" "public-subnet-2" {
   vpc_id     = aws_vpc.project_vpc.id
-  cidr_block = "10.0.0.64/26"
-  availability_zone = "ap-south-1b"
+  cidr_block = var.subnet-2-cidr
+  availability_zone = var.subnet-2-az
 
   tags = {
     Name = "public-subnet-2"
@@ -39,8 +34,8 @@ resource "aws_subnet" "public-subnet-2" {
 
 resource "aws_subnet" "private-subnet-1" {
   vpc_id     = aws_vpc.project_vpc.id
-  cidr_block = "10.0.0.128/26"
-  availability_zone = "ap-south-1a"
+  cidr_block = var.subnet-3-cidr
+  availability_zone = var.subnet-3-az
 
   tags = {
     Name = "private-subnet-1"
@@ -50,8 +45,8 @@ resource "aws_subnet" "private-subnet-1" {
 
 resource "aws_subnet" "private-subnet-2" {
   vpc_id     = aws_vpc.project_vpc.id
-  cidr_block = "10.0.0.192/26"
-  availability_zone = "ap-south-1b"
+  cidr_block = var.subnet-4-cidr
+  availability_zone = var.subnet-4-az
 
   tags = {
     Name = "private-subnet-2"
@@ -222,9 +217,9 @@ resource "aws_security_group" "lt-sg" {
 #created aws launch template for ASG
 resource "aws_launch_template" "ec2-launch-temaplate" {
   name_prefix   = "ec2-"
-  image_id      = "ami-02d26659fd82cf299"
-  instance_type = "t2.micro"
-  key_name = "ec2_key"
+  image_id      = var.ami
+  instance_type = var.instance_type
+  key_name = var.key_name
   
   network_interfaces {
     security_groups = [aws_security_group.lt-sg.id]
@@ -308,13 +303,12 @@ resource "aws_security_group" "bastion_sg" {
 }
 
 resource "aws_instance" "bastion" {
-  ami                         = "ami-02d26659fd82cf299"
-  instance_type               = "t2.micro"
+  ami                         = var.ami
+  instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public-subnet-1.id        # Public subnet ID
   vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
-  key_name                   = "ec2_key"                            # Name of your EC2 keypair for SSH
+  key_name                   = var.key_name                            # Name of your EC2 keypair for SSH
   associate_public_ip_address = true
-  user_data_base64 = filebase64("userdata.sh")
 
   tags = {
     Name = "Bastion-Host"
@@ -379,7 +373,7 @@ resource "aws_security_group" "alb-sg" {
 resource "aws_lb" "application-lb" {
   name               = "ALB"
   internal           = false
-  load_balancer_type = "application"
+  load_balancer_type = var.lb-type
   security_groups    = [aws_security_group.alb-sg.id]
   subnets            = [aws_subnet.public-subnet-1.id , aws_subnet.public-subnet-2.id]
 
@@ -412,21 +406,5 @@ resource "aws_autoscaling_attachment" "tg-attachment" {                 #yaha pe
   lb_target_group_arn    = aws_lb_target_group.alb-target-group.arn
 }
 
-# Output the private IPs as a list
-output "asg-instance-private-ips-1" {
-  value = data.aws_instances.asg-instances.private_ips[0]
-}
 
-output "asg-instance-private-ips-2" {
-  value = data.aws_instances.asg-instances.private_ips[1]
-}
-
-output "bastion-public-ip" {
-  value = aws_instance.bastion.public_ip
-}
-
-output "load_balancer_dns" {
-  value = aws_lb.application-lb.dns_name
-  
-}
 
