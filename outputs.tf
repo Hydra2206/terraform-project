@@ -1,3 +1,5 @@
+
+
 # Output the private IPs as a list
 output "asg-instance-private-ips-1" {
   value = data.aws_instances.asg-instances.private_ips[0]
@@ -13,5 +15,6 @@ output "bastion-public-ip" {
 
 output "load_balancer_dns" {
   value = aws_lb.application-lb.dns_name
-  
+
 }
+
