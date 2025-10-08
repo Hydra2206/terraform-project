@@ -184,6 +184,11 @@ resource "aws_route_table_association" "rta-4" {
   route_table_id = aws_route_table.RT-4.id
 }
 
+data "aws_ssm_parameter" "ec2_key" {        #retrieving key pair details from aws
+  name = "/ec2/keypair/mykey"
+  with_decryption = true
+}
+
 #security group for launch template
 resource "aws_security_group" "lt-sg" {
   name        = "launch-template-sg"
@@ -220,7 +225,7 @@ resource "aws_launch_template" "ec2-launch-temaplate" {
   name_prefix   = "ec2-"
   image_id      = var.ami
   instance_type = var.instance_type
-  key_name      = var.key_name #abhi userdata ki testing ke liye keypair ka name change kiya hu variable se
+  key_name      = var.key_name
 
   network_interfaces {
     security_groups = [aws_security_group.lt-sg.id]
