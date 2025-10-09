@@ -29,3 +29,7 @@ variable "subnet-3-az" {
 variable "subnet-4-az" {
   description = "az for subnet 4"
 }
+
+variable "vpc_id" {
+  
+}
